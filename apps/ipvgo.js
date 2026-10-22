@@ -602,6 +602,8 @@ export async function main(ns) {
 
         candidates.sort((a, b) => b.priority - a.priority)
 
+        const currentScore = evaluateBoard(board)
+
         let bestMove = null
         let bestScore = -Infinity
 
@@ -616,7 +618,6 @@ export async function main(ns) {
                 new Set()
             )
 
-            // Search score is the main objective.
             const adjustedScore = score + move.priority * 0.01
 
             if (adjustedScore > bestScore) {
@@ -629,6 +630,11 @@ export async function main(ns) {
                     priority: move.priority,
                 }
             }
+        }
+
+        // Reject moves that look significantly worse than the current board.
+        if (bestMove !== null && bestMove.score < currentScore - 20) {
+            return null
         }
 
         return bestMove
@@ -723,9 +729,12 @@ export async function main(ns) {
                 continue
             }
 
-            if (shouldPassEndgame(board, state)) {
+            const validMoves = ns.go.analysis.getValidMoves()
+            let move = chooseMove(board, validMoves)
+
+            if (opponentPassed && move === null) {
                 ns.print(
-                    `Passing in endgame. Black: ${state.blackScore}, White: ${state.whiteScore}`
+                    `Passing to end game. Black: ${state.blackScore}, White: ${state.whiteScore}`
                 )
 
                 const result = await ns.go.passTurn(false)
@@ -735,9 +744,6 @@ export async function main(ns) {
                 opponentPassed = result.type === 'pass'
                 continue
             }
-
-            const validMoves = ns.go.analysis.getValidMoves()
-            let move = chooseMove(board, validMoves)
 
             if (move === null) {
                 const safeToPass =
