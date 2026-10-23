@@ -32,42 +32,23 @@ export function nukeAllServer(ns) {
     const blackListedServerHostnameList = ['home'].concat(generateOwnedServerHostname())
 
     const serverHostnameList = allServerHostnameList.filter((serverHostname) => {
-        for (var blackListedServerHostname of blackListedServerHostnameList) {
-            if (serverHostname == blackListedServerHostname) return false
-        }
-        return true
+        return !blackListedServerHostnameList.includes(serverHostname)
     })
 
     var nukedServerHostnameList = []
 
-    for (var i = 0; i < serverHostnameList.length; i++) {
-        var serverHostname = serverHostnameList[i]
+    for (var serverHostname of serverHostnameList) {
+        if (ns.hasRootAccess(serverHostname)) continue
 
-        try {
-            ns.brutessh(serverHostname)
-        } catch {}
+        ns.brutessh(serverHostname)
+        ns.ftpcrack(serverHostname)
+        ns.relaysmtp(serverHostname)
+        ns.httpworm(serverHostname)
+        ns.sqlinject(serverHostname)
 
-        try {
-            ns.ftpcrack(serverHostname)
-        } catch {}
-
-        try {
-            ns.ftpcrack(serverHostname)
-        } catch {}
-
-        try {
-            ns.relaysmtp(serverHostname)
-        } catch {}
-
-        try {
-            ns.sqlinject(serverHostname)
-        } catch {}
-
-        try {
-            ns.nuke(serverHostname)
-
+        if (ns.nuke(serverHostname)) {
             nukedServerHostnameList.push(serverHostname)
-        } catch {}
+        }
     }
 
     return nukedServerHostnameList

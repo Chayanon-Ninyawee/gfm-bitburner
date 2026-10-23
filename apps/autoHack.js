@@ -57,7 +57,7 @@ export async function main(ns) {
         ns,
         TargetHost,
         serverMinSecurity,
-        ns.getPlayer().skills.hacking, // TODO: Calculate this in a loop and use the predicted hacking level
+        ns.getPlayer().skills.hacking, // TODO: Calculate this in a loop and use the predicted hacking level and keep track of player hacking exp NOT LEVEL
         ns.getPlayer().mults.hacking_money
     )
     const growthLog = calculateGrowthLog(
@@ -114,7 +114,7 @@ export async function main(ns) {
 
         const hackThread = calculateHackThreads(
             serverMaxMoney,
-            TargetHackMoney * 1.05,
+            TargetHackMoney * 1.15,
             percentHacked
         )
         const hackSecurity = HackSecurity * hackThread
